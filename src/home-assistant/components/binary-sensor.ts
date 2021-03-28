@@ -44,10 +44,6 @@ export async function getBinarySensorConfig({
       })
     : undefined;
 
-  if (dataSourceAddress.did === "EUI64-0090DAFFFF005E36") {
-    console.log(device);
-  }
-
   return {
     state_topic: topic,
     value_template:
@@ -70,6 +66,7 @@ export async function getBinarySensorConfig({
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
       { topic: gatewayAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
     ],
+    availability_mode: "all",
   };
 }
 

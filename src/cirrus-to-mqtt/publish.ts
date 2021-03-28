@@ -20,6 +20,9 @@ export function publishSample({
 
   // TODO Move this out of cirrus-to-mqtt (this is more Home Assistant specific)
   if (sample.resourceType === "SampleUpState" && dataSourceAddress.did) {
+    if (dataSourceAddress.did.endsWith("5E36")) {
+      console.log({ did: dataSourceAddress.did, state: sample.deviceUpState?.name });
+    }
     mqttClient.publish(
       getAvailabilityTopic({ did: dataSourceAddress.did }),
       upValues.includes(sample.deviceUpState?.name) ? onlinePayload : offlinePayload

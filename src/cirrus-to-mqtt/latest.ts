@@ -20,7 +20,7 @@ export async function publishLatestSamples({
     (dsa) =>
       (dataSourceAddress.locationId ? dataSourceAddress.locationId === dsa.locationId : true) &&
       (dataSourceAddress.did ? dataSourceAddress.did === dsa.did : true) &&
-      (dataSourceAddress.variableName?.name ? dataSourceAddress.variableName?.name === dsa.variableName?.name : true)
+      (dataSourceAddress.variableName?.name ? dataSourceAddress.variableName.name === dsa.variableName?.name : true)
   );
 
   await Promise.all(

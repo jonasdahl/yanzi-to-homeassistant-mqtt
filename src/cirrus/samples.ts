@@ -10,11 +10,7 @@ export async function getLatestSample({
   const response = await socket.request({
     messageType: "GetSamplesRequest",
     dataSourceAddress,
-    timeSerieSelection: {
-      resourceType: "TimeSerieSelection",
-      numberOfSamplesBeforeStart: 1,
-      timeStart: Date.now() - 1000,
-    },
+    timeSerieSelection: { resourceType: "TimeSerieSelection", numberOfSamplesBeforeStart: 1, timeStart: Date.now() },
   });
   const sample = response.sampleListDto?.list?.[0];
   return sample ?? null;

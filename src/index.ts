@@ -46,4 +46,5 @@ async function run() {
     cirrusSampleSubscriptionToMqtt({ mqttClient, socket, locationId }),
     homeAssistantMqttConfiguration({ mqttClient, socket, locationId, discoveryTopicPrefix }),
   ]);
+  // TODO Maybe while (true) instead of crashing process on every fail?
 }

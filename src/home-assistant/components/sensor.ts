@@ -1,4 +1,12 @@
-import { DataSourceAddress, SampleCommunicationStatistics, SampleNodeStatistics } from "@yanzi/socket";
+import {
+  DataSourceAddress,
+  SampleCommunicationStatistics,
+  SampleNodeStatistics,
+  SamplePowerUpdate,
+  SampleSiteOnlineStatus,
+  SampleStatus,
+  SampleUpState,
+} from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { logger } from "../../logger";
@@ -43,7 +51,14 @@ export async function getSensorConfig({
         ? "{{ value_json.percentFull }}"
         : dataSourceAddress.variableName?.name === "positionLog"
         ? "[{{ value_json.longitude }},{{ value_json.latitude }}]"
+        : dataSourceAddress.variableName?.name === "unitState"
+        ? "{{ value_json.assetState.name }}"
+        : dataSourceAddress.variableName?.name === "upsState"
+        ? "{{ value_json.operatingPowerState.name }}"
+        : dataSourceAddress.variableName?.name === "siteOnlineStatus"
+        ? "{{ value_json.devicesTroubled }}"
         : "{{ value_json.value }}",
+
     json_attributes_topic: topic,
     json_attributes_template: "{{ value_json | tojson }}",
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
@@ -63,6 +78,7 @@ export async function getSensorConfig({
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
       { topic: gatewayAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
     ],
+    availability_mode: "all",
   };
 }
 

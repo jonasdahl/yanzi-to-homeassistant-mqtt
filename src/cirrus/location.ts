@@ -75,8 +75,5 @@ export async function getLocationMetadata({
     (next, { unitAddress: { did }, version }) => ({ ...next, [did]: version ?? undefined }),
     {} as Record<string, string | undefined>
   );
-  return {
-    ...data.location,
-    versions,
-  };
+  return { ...data.location, versions };
 }

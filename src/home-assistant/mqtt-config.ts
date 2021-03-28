@@ -19,7 +19,7 @@ export async function homeAssistantMqttConfiguration({
   discoveryTopicPrefix: string;
 }) {
   await Promise.race([
-    pollDeviceDiscovery({ mqttClient, socket, interval: 1000 * 60 * 10, locationId, discoveryTopicPrefix }),
+    pollDeviceDiscovery({ mqttClient, socket, interval: 1000 * 60 * 3, locationId, discoveryTopicPrefix }),
     discoverDevicesOnHomeAssistantStartup({ mqttClient, socket, locationId, discoveryTopicPrefix }),
   ]);
 }
@@ -94,6 +94,8 @@ async function setupUnitState({
   const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
   logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
   await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+
+  await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
 }
 
 async function setupMotion({
@@ -182,6 +184,11 @@ async function pollDeviceDiscovery({
     logger.info("Starting periodic device discovery");
     discoverDevices({ socket, mqttClient, discoveryTopicPrefix, locationId });
     logger.info("Periodic device discovery done, sleeping %d ms", interval);
+    await publishLatestSamples({
+      socket,
+      dataSourceAddress: { resourceType: "DataSourceAddress", locationId },
+      mqttClient,
+    });
     await new Promise((resolve) => setTimeout(resolve, interval));
   }
 }

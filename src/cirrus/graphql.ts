@@ -28,7 +28,7 @@ export async function graphqlRequest<T>({
         console.error(e);
       });
       if (!res || !res.ok) {
-        throw new Error("Failed to fetch");
+        throw new Error("Failed to fetch: " + (res ? `${res.status} ${res.statusText}` : "No response."));
       }
       const json = await res.json();
       if (!dataType.is(json)) {
