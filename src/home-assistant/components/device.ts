@@ -12,12 +12,7 @@ export async function getDeviceConfig({
   locationId: string;
   sessionId: string;
 }) {
-  const unit = await getUnitMetadata({
-    cirrusHost,
-    did,
-    locationId,
-    sessionId,
-  });
+  const unit = await getUnitMetadata({ cirrusHost, did, locationId, sessionId });
 
   return {
     connections: [],

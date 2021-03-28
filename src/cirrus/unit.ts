@@ -22,6 +22,7 @@ export async function getUnitMetadata({
         location(locationId: $locationId) { 
           gateway { unitAddress { did } }
           unit(did: $did) {
+            unitTypeFixed
             name
             unitAddress { did }
             productType
@@ -34,15 +35,15 @@ export async function getUnitMetadata({
     variables: { locationId, did },
   });
 
-  const locationMetadata = await getLocationMetadata({
-    cirrusHost,
-    locationId,
-    sessionId,
-  });
+  const locationMetadata = await getLocationMetadata({ cirrusHost, locationId, sessionId });
   const deviceDid =
     data.location.unit.chassisParent?.unitTypeFixed === "physicalOrChassis"
       ? data.location.unit.chassisParent.unitAddress.did
-      : null;
+      : data.location.unit.unitTypeFixed === "physicalOrChassis"
+      ? data.location.unit.unitAddress.did
+      : data.location.unit.unitTypeFixed === "gateway"
+      ? data.location.unit.unitAddress.did
+      : did;
   return {
     ...data.location.unit,
     version: locationMetadata.versions[did],
@@ -57,6 +58,7 @@ const dataType = t.type({
       gateway: t.type({ unitAddress: t.type({ did: t.string }) }),
       unit: t.type({
         name: t.string,
+        unitTypeFixed: t.string,
         unitAddress: t.type({ did: t.string }),
         dataSources: t.array(t.type({ variableName: t.string, siUnit: t.union([t.null, t.undefined, t.string]) })),
         productType: t.union([t.null, t.string]),

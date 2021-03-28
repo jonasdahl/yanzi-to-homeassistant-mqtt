@@ -1,9 +1,9 @@
-import { DataSourceAddress } from "@yanzi/socket";
+import { DataSourceAddress, DeviceUpState } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { getDeviceConfig } from "./device";
-import { getDeviceClass } from "../utils/device-classes";
 import { getUnitOfMeasurement } from "../utils/unit-of-measurement";
+import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availability";
 
 export async function getBinarySensorConfig({
   dataSourceAddress,
@@ -30,22 +30,54 @@ export async function getBinarySensorConfig({
     sessionId,
   });
 
+  const chassisAvailabilityTopic = getAvailabilityTopic({
+    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
+  });
+  const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
+
+  const device = unit.deviceDid
+    ? await getDeviceConfig({
+        cirrusHost,
+        did: unit.deviceDid,
+        locationId: dataSourceAddress.locationId,
+        sessionId,
+      })
+    : undefined;
+
+  if (dataSourceAddress.did === "EUI64-0090DAFFFF005E36") {
+    console.log(device);
+  }
+
   return {
     state_topic: topic,
-    value_template: "{{ value_json.value }}",
+    value_template:
+      dataSourceAddress.variableName?.name === "uplog"
+        ? `{% if value_json.deviceUpState.name in ["goingUp", "up"] %}on{% elif value_json.deviceUpState.name == 'unknown' %}None{% else %}off{% endif %}`
+        : dataSourceAddress.variableName?.name === "unitState"
+        ? `{% if value_json.assetState.name == 'occupied' %}on{% elif value_json.assetState.name == 'free' %}off{% else %}off{% endif %}`
+        : "{{ value_json.value }}",
     json_attributes_topic: topic,
     json_attributes_template: "{{ value_json | tojson }}",
-    name: `${dataSourceAddress.locationId}-${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`, // TODO
-    unique_id: `${dataSourceAddress.locationId}-${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
+    payload_on: "on",
+    payload_off: "off",
+    name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
+    unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
-    device: unit.deviceDid
-      ? getDeviceConfig({
-          cirrusHost,
-          did: unit.deviceDid,
-          locationId: dataSourceAddress.locationId,
-          sessionId,
-        })
-      : null,
-    unit_of_measurement: getUnitOfMeasurement({ dataSourceAddress }),
+    device,
+    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, cirrusHost, sessionId }),
+
+    availability: [
+      { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
+      { topic: gatewayAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
+    ],
   };
+}
+
+export function getDeviceClass({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
+  switch (dataSourceAddress?.variableName?.name) {
+    case "uplog":
+      return "connectivity";
+    case "unitState":
+      return "occupancy";
+  }
 }

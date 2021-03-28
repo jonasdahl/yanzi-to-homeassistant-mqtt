@@ -1,9 +1,10 @@
 import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { AsyncClient } from "async-mqtt";
-import { publishSample } from "../cirrus-to-mqtt/subscriptions";
+import { publishLatestSamples } from "../cirrus-to-mqtt/latest";
 import { getAllDataSources } from "../cirrus/data-sources";
-import { getLatestSample } from "../cirrus/samples";
 import { logger } from "../logger";
+import { getBinarySensorConfig } from "./components/binary-sensor";
+import { getDeviceTriggerConfig } from "./components/device-trigger";
 import { getSensorConfig } from "./components/sensor";
 
 export async function homeAssistantMqttConfiguration({
@@ -38,46 +39,99 @@ async function discoverDevices({
     throw new Error("Socket must be authenticated.");
   }
   const cirrusHost = new URL(socket.url).host;
-
   const dataSourceAddresses = await getAllDataSources({ cirrusHost, locationId, socket });
 
   for (const dataSourceAddress of dataSourceAddresses) {
-    const component = "sensor";
-    const discoveryTopic = `${discoveryTopicPrefix}/${component}/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
-    logger.debug("Advertising unit on topic: %s", discoveryTopic);
-    const configPayload = await getSensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId });
-    await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+    switch (dataSourceAddress.variableName?.name) {
+      case "uplog":
+        setupUplog({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
+      case "motion":
+        setupMotion({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
+      case "unitState":
+        setupUnitState({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
+      default: {
+        setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
+      }
+    }
   }
 }
 
-async function publishLatestSamples({
+async function setupUplog({
   socket,
   mqttClient,
+  discoveryTopicPrefix,
   dataSourceAddress,
 }: {
   socket: YanziSocket;
   mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
   dataSourceAddress: DataSourceAddress;
 }) {
   const cirrusHost = new URL(socket.url).host;
-  const allDataSources = await getAllDataSources({ cirrusHost, locationId: dataSourceAddress.locationId!, socket });
-  const dataSourceAddresses = allDataSources.filter(
-    (dsa) =>
-      (dataSourceAddress.locationId ? dataSourceAddress.locationId === dsa.locationId : true) &&
-      (dataSourceAddress.did ? dataSourceAddress.did === dsa.did : true) &&
-      (dataSourceAddress.variableName ? dataSourceAddress.variableName === dsa.variableName : true)
-  );
+  const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
+  logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+}
 
-  await Promise.all(
-    dataSourceAddresses
-      .map(async (dataSourceAddress) => {
-        const sample = await getLatestSample({ socket, dataSourceAddress });
-        if (sample) {
-          await publishSample({ sample, dataSourceAddress, mqttClient });
-        }
-      })
-      .map((promise) => promise.catch((e) => logger.error(e)))
-  );
+async function setupUnitState({
+  socket,
+  mqttClient,
+  discoveryTopicPrefix,
+  dataSourceAddress,
+}: {
+  socket: YanziSocket;
+  mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
+  dataSourceAddress: DataSourceAddress;
+}) {
+  const cirrusHost = new URL(socket.url).host;
+  const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
+  logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+}
+
+async function setupMotion({
+  socket,
+  mqttClient,
+  discoveryTopicPrefix,
+  dataSourceAddress,
+}: {
+  socket: YanziSocket;
+  mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
+  dataSourceAddress: DataSourceAddress;
+}) {
+  const cirrusHost = new URL(socket.url).host;
+  const triggerTopic = `${discoveryTopicPrefix}/device_automation/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  const triggerPayload = await getDeviceTriggerConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
+  logger.debug("Advertising device_automation on topic: %s", triggerTopic);
+  await mqttClient.publish(triggerTopic, JSON.stringify(triggerPayload));
+
+  await setupGenericSensor({ socket, mqttClient, discoveryTopicPrefix, dataSourceAddress });
+}
+
+async function setupGenericSensor({
+  socket,
+  mqttClient,
+  discoveryTopicPrefix,
+  dataSourceAddress,
+}: {
+  socket: YanziSocket;
+  mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
+  dataSourceAddress: DataSourceAddress;
+}) {
+  const cirrusHost = new URL(socket.url).host;
+  const discoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  logger.debug("Advertising sensor on topic: %s", discoveryTopic);
+  const configPayload = await getSensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
 }
 
 async function discoverDevicesOnHomeAssistantStartup({

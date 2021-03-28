@@ -22,7 +22,7 @@ export async function graphqlRequest<T>({
     queryFn: async () => {
       const res = await fetch(`https://${cirrusHost}/graphql`, {
         method: "POST",
-        headers: { authorization: `bearer ${sessionId}` },
+        headers: { authorization: `bearer ${sessionId}`, "content-type": "text/plain; charset=UTF-8" },
         body: JSON.stringify({ query, variables }),
       }).catch((e) => {
         console.error(e);

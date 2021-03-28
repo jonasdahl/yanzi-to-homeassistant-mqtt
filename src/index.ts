@@ -3,11 +3,9 @@ import MQTT, { AsyncClient } from "async-mqtt";
 import "make-promises-safe";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
 import { login } from "./cirrus/login";
-import { cirrusPassword, cirrusUsername, discoveryTopicPrefix, locationId, mqttUrl } from "./config";
+import { cirrusHost, cirrusPassword, cirrusUsername, discoveryTopicPrefix, locationId, mqttUrl } from "./config";
 import { homeAssistantMqttConfiguration } from "./home-assistant/mqtt-config";
 import { logger } from "./logger";
-
-const cirrusHost = "eu.yanzi.cloud";
 
 run()
   .catch((e) => {

@@ -1,12 +1,10 @@
-import { DataSourceAddress, SampleCommunicationStatistics, SampleNodeStatistics } from "@yanzi/socket";
+import { DataSourceAddress } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { logger } from "../../logger";
-import { getAvailabilityTopic, onlinePayload, offlinePayload } from "../availability";
 import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
 import { getDeviceConfig } from "./device";
 
-export async function getSensorConfig({
+export async function getDeviceTriggerConfig({
   dataSourceAddress,
   cirrusHost,
   sessionId,
@@ -31,24 +29,11 @@ export async function getSensorConfig({
     sessionId,
   });
 
-  const chassisAvailabilityTopic = getAvailabilityTopic({
-    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
-  });
-  const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
-
   return {
-    state_topic: topic,
-    value_template:
-      dataSourceAddress.variableName?.name === "battery"
-        ? "{{ value_json.percentFull }}"
-        : dataSourceAddress.variableName?.name === "positionLog"
-        ? "[{{ value_json.longitude }},{{ value_json.latitude }}]"
-        : "{{ value_json.value }}",
-    json_attributes_topic: topic,
-    json_attributes_template: "{{ value_json | tojson }}",
-    name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
-    unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
-    device_class: getDeviceClass({ dataSourceAddress }),
+    automation_type: "trigger",
+    topic,
+    type: "motion triggered",
+    subtype: "PIR",
     device: unit.deviceDid
       ? await getDeviceConfig({
           cirrusHost,
@@ -57,12 +42,6 @@ export async function getSensorConfig({
           sessionId,
         })
       : undefined,
-    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, cirrusHost, sessionId }),
-
-    availability: [
-      { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
-      { topic: gatewayAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
-    ],
   };
 }
 

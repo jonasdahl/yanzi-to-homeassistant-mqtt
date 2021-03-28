@@ -1,13 +1,7 @@
-import {
-  DataSourceAddress,
-  SampleDTO,
-  SampleList,
-  SubscribeRequest,
-  SubscriptionType,
-  YanziSocket,
-} from "@yanzi/socket";
+import { DataSourceAddress, SampleList, SubscribeRequest, SubscriptionType, YanziSocket } from "@yanzi/socket";
 import { AsyncClient } from "async-mqtt";
 import { logger } from "../logger";
+import { publishSample } from "./publish";
 
 export async function cirrusSampleSubscriptionToMqtt({
   locationId,
@@ -44,10 +38,7 @@ function handleSampleList(
   {
     getMqttTopic,
     mqttClient,
-  }: {
-    mqttClient: AsyncClient;
-    getMqttTopic?: (args: { dataSourceAddress: DataSourceAddress }) => string;
-  }
+  }: { mqttClient: AsyncClient; getMqttTopic?: (args: { dataSourceAddress: DataSourceAddress }) => string }
 ) {
   const dataSourceAddress = resource.dataSourceAddress;
   const samples = resource.list;
@@ -57,24 +48,23 @@ function handleSampleList(
   }
 
   for (const sample of samples) {
+    if (dataSourceAddress?.variableName?.name === "temperatureK" && sample.resourceType === "SampleTemp") {
+      // Cirrus doesn't sent temperatureC updates, so we need to augment that...
+      publishSample({
+        dataSourceAddress: {
+          ...dataSourceAddress,
+          variableName: { resourceType: "VariableName", name: "temperatureC" },
+        },
+        mqttClient,
+        sample: {
+          ...sample,
+          value: sample.value !== undefined ? Math.round((sample.value - 273.15) * 100) / 100 : undefined,
+        },
+        getMqttTopic,
+      });
+    }
     publishSample({ dataSourceAddress, mqttClient, sample, getMqttTopic });
   }
-}
-
-export function publishSample({
-  mqttClient,
-  sample,
-  dataSourceAddress,
-  getMqttTopic = defaultMqttTopicMapper,
-}: {
-  mqttClient: AsyncClient;
-  sample: SampleDTO;
-  dataSourceAddress: DataSourceAddress;
-  getMqttTopic?: (args: { dataSourceAddress: DataSourceAddress }) => string;
-}) {
-  const topic = getMqttTopic({ dataSourceAddress });
-  logger.debug("Sending %s on topic: %s", sample.resourceType, topic);
-  return mqttClient.publish(topic, JSON.stringify(sample));
 }
 
 export function defaultMqttTopicMapper({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
