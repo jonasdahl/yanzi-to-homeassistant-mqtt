@@ -1,0 +1,40 @@
+version: "3.9"
+
+volumes:
+  homeassistant-config:
+    driver: local
+  homeassistant-shared:
+    driver: local
+
+  mosquitto-data:
+    driver: local
+  mosquitto-logs:
+    driver: local
+  mosquitto-conf:
+    driver: local
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    restart: unless-stopped
+    image: homeassistant/home-assistant
+    volumes:
+      - homeassistant-config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - homeassistant-shared:/shared
+    privileged: true
+    links:
+      - "mosquitto:mosquitto"
+    ports:
+      - "8123:8123"
+
+  mosquitto:
+    container_name: mosquitto
+    image: eclipse-mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - ./mosquitto-config:/mosquitto/config
+    restart: unless-stopped

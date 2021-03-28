@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "strict": true,
+    "types": ["src/types.d.ts"]
+  },
+  "include": ["src/**/*"]
+}
