@@ -19,7 +19,15 @@ export async function getUnitOfMeasurement({
     case "NA":
       return undefined;
     case "percent":
-      "%";
+      return "%";
+    case "kelvin":
+      return "K";
+    case "celsius":
+      return "°C";
+    case "pascal":
+      return "Pa";
+    case "motion":
+      return undefined;
     default:
       return siUnit;
   }

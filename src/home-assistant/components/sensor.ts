@@ -50,7 +50,7 @@ export async function getSensorConfig({
       dataSourceAddress.variableName?.name === "battery"
         ? "{{ value_json.percentFull }}"
         : dataSourceAddress.variableName?.name === "positionLog"
-        ? "[{{ value_json.longitude }},{{ value_json.latitude }}]"
+        ? "({{ value_json.longitude }}, {{ value_json.latitude }})"
         : dataSourceAddress.variableName?.name === "unitState"
         ? "{{ value_json.assetState.name }}"
         : dataSourceAddress.variableName?.name === "upsState"
