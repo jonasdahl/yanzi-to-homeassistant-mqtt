@@ -42,6 +42,7 @@ services:
   yanzi-exporter:
     container_name: yanzi_exporter
     image: ghcr.io/jonasdahl/yanzi-to-homeassistant-mqtt:latest
+    restart: unless-stopped
     environment:
       CIRRUS_PASSWORD: nope # define in docker-compose.override.yml
       CIRRUS_USERNAME: nope # define in docker-compose.override.yml
