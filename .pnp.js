@@ -38,6 +38,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",
           "packageDependencies": [
             ["@types/lodash", "npm:4.14.168"],
+            ["@types/node", "npm:14.14.37"],
             ["@types/node-fetch", "npm:2.5.8"],
             ["@types/pino", "npm:6.3.6"],
             ["@types/ws", "npm:7.4.0"],
@@ -3763,6 +3764,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["yanzi-homeassistant-mqtt", "workspace:."],
             ["@types/lodash", "npm:4.14.168"],
+            ["@types/node", "npm:14.14.37"],
             ["@types/node-fetch", "npm:2.5.8"],
             ["@types/pino", "npm:6.3.6"],
             ["@types/ws", "npm:7.4.0"],

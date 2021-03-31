@@ -2,7 +2,8 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "strict": true,
-    "types": ["src/types.d.ts"]
+    "outDir": "dist",
+    "rootDir": "src"
   },
   "include": ["src/**/*"]
 }
