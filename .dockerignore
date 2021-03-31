@@ -1,1 +1,6 @@
 .env
+dev
+.github
+.vscode
+.prettierrc.json
+.yarn-error.log

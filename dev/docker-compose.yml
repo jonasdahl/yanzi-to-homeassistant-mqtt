@@ -38,3 +38,12 @@ services:
       - mosquitto-data:/mosquitto/data
       - ./mosquitto-config:/mosquitto/config
     restart: unless-stopped
+
+  yanzi-exporter:
+    container_name: yanzi_exporter
+    image: ghcr.io/jonasdahl/yanzi-to-homeassistant-mqtt:latest
+    environment:
+      CIRRUS_PASSWORD: nope # define in docker-compose.override.yml
+      CIRRUS_USERNAME: nope # define in docker-compose.override.yml
+      LOCATION_ID: "76604" # define in docker-compose.override.yml
+      MQTT_URL: tcp://mosquitto:1883 # define in docker-compose.override.yml
