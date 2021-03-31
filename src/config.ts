@@ -10,6 +10,7 @@ export const {
   DISCOVERY_TOPIC: discoveryTopicPrefix,
   MQTT_URL: mqttUrl,
   CIRRUS_HOST: cirrusHost,
+  LOG_LEVEL: logLevel,
 } = cleanEnv(process.env, {
   CIRRUS_USERNAME: str({}),
   CIRRUS_PASSWORD: str({}),
@@ -18,4 +19,5 @@ export const {
   DISCOVERY_TOPIC: str({ default: "homeassistant" }),
   MQTT_URL: url({ devDefault: "tcp://jonas:test@localhost:1883" }),
   CIRRUS_HOST: str({ default: "eu.yanzi.cloud" }),
+  LOG_LEVEL: str({ default: "info", devDefault: "debug", choices: ["debug", "info", "warn", "error"] }),
 });
