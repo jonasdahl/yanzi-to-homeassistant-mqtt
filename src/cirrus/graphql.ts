@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import * as t from "io-ts";
 import { QueryClient } from "react-query/core";
 
-const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 10 * 1000, cacheTime: 10 * 1000 } } });
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30 * 1000, cacheTime: 30 * 1000 } } });
 
 export async function graphqlRequest<T>({
   cirrusHost,
