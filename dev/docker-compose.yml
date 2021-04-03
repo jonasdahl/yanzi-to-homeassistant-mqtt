@@ -18,6 +18,7 @@ services:
     container_name: homeassistant
     restart: unless-stopped
     image: homeassistant/home-assistant
+    restart: unless-stopped
     volumes:
       - homeassistant-config:/config
       - /etc/localtime:/etc/localtime:ro
@@ -31,6 +32,7 @@ services:
   mosquitto:
     container_name: mosquitto
     image: eclipse-mosquitto
+    restart: unless-stopped
     ports:
       - 1883:1883
       - 9001:9001
@@ -44,6 +46,7 @@ services:
     image: ghcr.io/jonasdahl/yanzi-to-homeassistant-mqtt:latest
     restart: unless-stopped
     environment:
+      LOG_LEVEL: debug
       CIRRUS_PASSWORD: nope # define in docker-compose.override.yml
       CIRRUS_USERNAME: nope # define in docker-compose.override.yml
       LOCATION_ID: "76604" # define in docker-compose.override.yml

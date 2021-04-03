@@ -19,7 +19,7 @@ export async function homeAssistantMqttConfiguration({
   discoveryTopicPrefix: string;
 }) {
   await Promise.race([
-    pollDeviceDiscovery({ mqttClient, socket, interval: 1000 * 60 * 3, locationId, discoveryTopicPrefix }),
+    pollDeviceDiscovery({ mqttClient, socket, interval: 1000 * 60 * 60 * 6, locationId, discoveryTopicPrefix }),
     discoverDevicesOnHomeAssistantStartup({ mqttClient, socket, locationId, discoveryTopicPrefix }),
   ]);
 }
