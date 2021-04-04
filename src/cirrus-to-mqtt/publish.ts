@@ -22,11 +22,12 @@ export function publishSample({
   if (sample.resourceType === "SampleUpState" && dataSourceAddress.did) {
     mqttClient.publish(
       getAvailabilityTopic({ did: dataSourceAddress.did }),
-      upValues.includes(sample.deviceUpState?.name) ? onlinePayload : offlinePayload
+      upValues.includes(sample.deviceUpState?.name) ? onlinePayload : offlinePayload,
+      { retain: true }
     );
   }
 
-  return mqttClient.publish(topic, JSON.stringify(sample));
+  return mqttClient.publish(topic, JSON.stringify(sample), { retain: true });
 }
 
 const upValues: (DeviceUpState["name"] | undefined)[] = ["up", "goingUp"];

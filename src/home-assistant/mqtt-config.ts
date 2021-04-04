@@ -75,7 +75,7 @@ async function setupUplog({
   const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
   const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
   logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
-  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload), { retain: true });
 }
 
 async function setupUnitState({
@@ -93,7 +93,7 @@ async function setupUnitState({
   const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
   const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
   logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
-  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload), { retain: true });
 
   await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
 }
@@ -113,12 +113,12 @@ async function setupMotion({
   const triggerTopic = `${discoveryTopicPrefix}/device_automation/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
   const triggerPayload = await getDeviceTriggerConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
   logger.debug("Advertising device_automation on topic: %s", triggerTopic);
-  await mqttClient.publish(triggerTopic, JSON.stringify(triggerPayload));
+  await mqttClient.publish(triggerTopic, JSON.stringify(triggerPayload), { retain: true });
 
   const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
   const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
   logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
-  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload), { retain: true });
 
   await setupGenericSensor({ socket, mqttClient, discoveryTopicPrefix, dataSourceAddress });
 }
@@ -138,7 +138,7 @@ async function setupGenericSensor({
   const discoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
   logger.debug("Advertising sensor on topic: %s", discoveryTopic);
   const configPayload = await getSensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
-  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload), { retain: true });
 }
 
 async function discoverDevicesOnHomeAssistantStartup({
