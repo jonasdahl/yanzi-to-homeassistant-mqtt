@@ -18,7 +18,7 @@ export async function getDeviceConfig({
     connections: [],
     identifiers: [unit.unitAddress.did],
     name: unit.name,
-    model: productNames[unit.productType ?? ""] ?? unit.productType ?? "Yanzi Device",
+    model: productNames[unit.productType ?? ""] ?? unit.productType ?? unit.unitTypeFixed ?? "Yanzi Unit",
     manufacturer: "Yanzi by Altacogni",
     via_device: unit.gatewayDid,
     sw_version: unit.version ?? undefined,
