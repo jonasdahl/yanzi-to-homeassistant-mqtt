@@ -79,5 +79,7 @@ export function getDeviceClass({ dataSourceAddress }: { dataSourceAddress: DataS
       return "connectivity";
     case "unitState":
       return "occupancy";
+    case "motion":
+      return "motion";
   }
 }

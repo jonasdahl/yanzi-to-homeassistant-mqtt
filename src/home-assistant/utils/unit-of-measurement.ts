@@ -13,6 +13,9 @@ export async function getUnitOfMeasurement({
   if (dataSourceAddress.variableName?.name === "battery") {
     return "%";
   }
+  if (dataSourceAddress.variableName?.name === "motion") {
+    return undefined;
+  }
   const res = await getDataSourceMetadata({ dataSourceAddress, cirrusHost, sessionId });
   const siUnit = res?.siUnit?.trim();
   switch (siUnit) {
