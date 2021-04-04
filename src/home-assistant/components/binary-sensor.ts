@@ -51,7 +51,10 @@ export async function getBinarySensorConfig({
         ? `{% if value_json.deviceUpState.name in ["goingUp", "up"] %}on{% elif value_json.deviceUpState.name == 'unknown' %}None{% else %}off{% endif %}`
         : dataSourceAddress.variableName?.name === "unitState"
         ? `{% if value_json.assetState.name == 'occupied' %}on{% elif value_json.assetState.name == 'free' %}off{% else %}off{% endif %}`
+        : dataSourceAddress.variableName?.name === "motion"
+        ? "on"
         : "{{ value_json.value }}",
+    off_delay: dataSourceAddress.variableName?.name === "motion" ? 60 : undefined,
     json_attributes_topic: topic,
     json_attributes_template: "{{ value_json | tojson }}",
     payload_on: "on",

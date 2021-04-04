@@ -36,7 +36,9 @@ export async function graphqlRequest<T>({
       }
       return json;
     },
-    retry: 3,
+    retry: 2,
+    staleTime: 30 * 1000,
+    cacheTime: 30 * 1000,
   });
   return data;
 }

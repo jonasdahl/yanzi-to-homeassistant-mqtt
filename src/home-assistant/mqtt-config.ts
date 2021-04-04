@@ -115,6 +115,11 @@ async function setupMotion({
   logger.debug("Advertising device_automation on topic: %s", triggerTopic);
   await mqttClient.publish(triggerTopic, JSON.stringify(triggerPayload));
 
+  const discoveryTopic = `${discoveryTopicPrefix}/binary_sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  const configPayload = await getBinarySensorConfig({ dataSourceAddress, cirrusHost, sessionId: socket.sessionId! });
+  logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
+  await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload));
+
   await setupGenericSensor({ socket, mqttClient, discoveryTopicPrefix, dataSourceAddress });
 }
 
