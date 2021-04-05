@@ -54,7 +54,7 @@ export async function getBinarySensorConfig({
         : dataSourceAddress.variableName?.name === "motion"
         ? `{% if value_json.timeLastMotion > as_timestamp(now()) * 1000 - 60 * 1000 %}on{% else %}off{% endif %}`
         : "{{ value_json.value }}",
-    off_delay: dataSourceAddress.variableName?.name === "motion" ? 60 : undefined,
+    // off_delay: dataSourceAddress.variableName?.name === "motion" ? 60 : undefined,
     json_attributes_topic: topic,
     json_attributes_template: "{{ value_json | tojson }}",
     payload_on: "on",
