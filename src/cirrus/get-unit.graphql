@@ -24,6 +24,9 @@ query GetUnit($locationId: String!, $did: String!) {
         }
         unitTypeFixed
       }
+      assetParent {
+        name
+      }
     }
   }
 }

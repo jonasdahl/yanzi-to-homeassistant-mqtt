@@ -22,5 +22,6 @@ export async function getDeviceConfig({
     manufacturer: "Yanzi by Altacogni",
     via_device: unit.gatewayDid,
     sw_version: unit.version ?? undefined,
+    suggested_area: unit.assetParent?.name ?? undefined,
   };
 }
