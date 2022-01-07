@@ -1,5 +1,6 @@
 import { getUnitMetadata } from "../../cirrus/unit";
 import { productNames } from "../../cirrus/products";
+import { UnitType } from "../../generated/graphql";
 
 export async function getDeviceConfig({
   cirrusHost,
@@ -22,6 +23,7 @@ export async function getDeviceConfig({
     manufacturer: "Yanzi by Altacogni",
     via_device: unit.gatewayDid,
     sw_version: unit.version ?? undefined,
-    suggested_area: unit.assetParent?.name ?? undefined,
+    suggested_area:
+      unit.chassisParent?.unitTypeFixed === UnitType.Gateway ? unit.name : unit.assetParent?.name ?? undefined,
   };
 }
