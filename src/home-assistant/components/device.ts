@@ -24,6 +24,8 @@ export async function getDeviceConfig({
     via_device: unit.gatewayDid,
     sw_version: unit.version ?? undefined,
     suggested_area:
-      unit.chassisParent?.unitTypeFixed === UnitType.Gateway ? undefined : unit.assetParent?.name ?? undefined,
+      unit.chassisParent?.unitTypeFixed === UnitType.Gateway
+        ? undefined
+        : unit.assetParent?.name ?? unit.chassisParent?.assetParent?.name,
   };
 }
