@@ -1,40 +1,28 @@
-import fetch from "node-fetch";
-import * as t from "io-ts";
 import { QueryClient } from "react-query/core";
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
+import { GraphQLClient } from "graphql-request";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30 * 1000, cacheTime: 30 * 1000 } } });
 
-export async function graphqlRequest<T>({
+export async function graphqlRequest<TData, TVariables>({
   cirrusHost,
   sessionId,
   query,
   variables,
-  dataType,
 }: {
   sessionId: string;
   cirrusHost: string;
-  query: string;
-  variables: Record<string, string>;
-  dataType: t.Type<T>;
+  query: TypedDocumentNode<TData, TVariables>;
+  variables: TVariables;
 }) {
   const data = await queryClient.fetchQuery({
     queryKey: ["graphql-query", cirrusHost, sessionId, variables, query],
     queryFn: async () => {
-      const res = await fetch(`https://${cirrusHost}/graphql`, {
-        method: "POST",
-        headers: { authorization: `bearer ${sessionId}`, "content-type": "text/plain; charset=UTF-8" },
-        body: JSON.stringify({ query, variables }),
-      }).catch((e) => {
-        console.error(e);
+      const client = new GraphQLClient(`https://${cirrusHost}/graphql`, {
+        headers: { authorization: `bearer ${sessionId}` },
       });
-      if (!res || !res.ok) {
-        throw new Error("Failed to fetch: " + (res ? `${res.status} ${res.statusText}` : "No response."));
-      }
-      const json = await res.json();
-      if (!dataType.is(json)) {
-        throw new Error("Invalid data format: " + JSON.stringify(json));
-      }
-      return json;
+      const res = await client.request<TData, TVariables>(query, variables);
+      return res;
     },
     retry: 2,
     staleTime: 30 * 1000,

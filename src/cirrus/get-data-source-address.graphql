@@ -1,0 +1,26 @@
+query GetDataSourceAddress($locationId: String!, $did: String!) {
+  location(locationId: $locationId) {
+    gateway {
+      unitAddress {
+        did
+      }
+    }
+    unit(did: $did) {
+      name
+      unitAddress {
+        did
+      }
+      productType
+      dataSources {
+        variableName
+        siUnit
+      }
+      chassisParent {
+        unitAddress {
+          did
+        }
+        unitTypeFixed
+      }
+    }
+  }
+}

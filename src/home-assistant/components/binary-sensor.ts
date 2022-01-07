@@ -31,7 +31,7 @@ export async function getBinarySensorConfig({
   });
 
   const chassisAvailabilityTopic = getAvailabilityTopic({
-    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
+    did: unit.chassisParent?.unitAddress?.did ?? dataSourceAddress.did,
   });
   const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
 

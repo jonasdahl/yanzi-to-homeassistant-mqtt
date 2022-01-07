@@ -1,15 +1,6 @@
-import {
-  DataSourceAddress,
-  SampleCommunicationStatistics,
-  SampleNodeStatistics,
-  SamplePowerUpdate,
-  SampleSiteOnlineStatus,
-  SampleStatus,
-  SampleUpState,
-} from "@yanzi/socket";
+import { DataSourceAddress } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { logger } from "../../logger";
 import { getAvailabilityTopic, onlinePayload, offlinePayload } from "../availability";
 import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
 import { getDeviceConfig } from "./device";
@@ -40,7 +31,7 @@ export async function getSensorConfig({
   });
 
   const chassisAvailabilityTopic = getAvailabilityTopic({
-    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
+    did: unit.chassisParent?.unitAddress?.did ?? dataSourceAddress.did,
   });
   const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
 

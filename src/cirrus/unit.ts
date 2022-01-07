@@ -1,4 +1,4 @@
-import * as t from "io-ts";
+import { GetUnitDocument } from "../generated/graphql";
 import { graphqlRequest } from "./graphql";
 import { getLocationMetadata } from "./location";
 
@@ -13,57 +13,32 @@ export async function getUnitMetadata({
   locationId: string;
   did: string;
 }) {
-  const { data } = await graphqlRequest({
+  const data = await graphqlRequest({
     cirrusHost,
-    dataType,
     sessionId,
-    query: `
-      query GetUnits($locationId: String!, $did: String!) { 
-        location(locationId: $locationId) { 
-          gateway { unitAddress { did } }
-          unit(did: $did) {
-            unitTypeFixed
-            name
-            unitAddress { did }
-            productType
-            dataSources { variableName siUnit }
-            chassisParent { unitAddress { did } unitTypeFixed }
-          }
-        } 
-      }
-    `,
+    query: GetUnitDocument,
     variables: { locationId, did },
   });
 
   const locationMetadata = await getLocationMetadata({ cirrusHost, locationId, sessionId });
+  const unit = data.location?.unit;
   const deviceDid =
-    data.location.unit.chassisParent?.unitTypeFixed === "physicalOrChassis"
-      ? data.location.unit.chassisParent.unitAddress.did
-      : data.location.unit.unitTypeFixed === "physicalOrChassis"
-      ? data.location.unit.unitAddress.did
-      : data.location.unit.unitTypeFixed === "gateway"
-      ? data.location.unit.unitAddress.did
+    unit?.chassisParent?.unitTypeFixed === "physicalOrChassis"
+      ? unit?.chassisParent?.unitAddress?.did
+      : unit?.unitTypeFixed === "physicalOrChassis"
+      ? unit?.unitAddress?.did
+      : unit?.unitTypeFixed === "gateway"
+      ? unit?.unitAddress?.did
       : did;
+
+  const name =
+    data.location?.unit?.nameSetByUser ?? data.location?.unit?.chassisParent?.name ?? data.location?.unit?.name;
+
   return {
-    ...data.location.unit,
-    version: locationMetadata.versions[did],
-    gatewayDid: data.location.gateway.unitAddress.did,
-    deviceDid,
+    ...data.location?.unit,
+    name: name,
+    version: locationMetadata.versions?.[did] ?? undefined,
+    gatewayDid: data.location?.gateway?.unitAddress?.did!,
+    deviceDid: deviceDid!,
   };
 }
-
-const dataType = t.type({
-  data: t.type({
-    location: t.type({
-      gateway: t.type({ unitAddress: t.type({ did: t.string }) }),
-      unit: t.type({
-        name: t.string,
-        unitTypeFixed: t.string,
-        unitAddress: t.type({ did: t.string }),
-        dataSources: t.array(t.type({ variableName: t.string, siUnit: t.union([t.null, t.undefined, t.string]) })),
-        productType: t.union([t.null, t.string]),
-        chassisParent: t.union([t.null, t.type({ unitAddress: t.type({ did: t.string }), unitTypeFixed: t.string })]),
-      }),
-    }),
-  }),
-});

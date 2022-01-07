@@ -1,6 +1,7 @@
 {
   "name": "yanzi-homeassistant-mqtt",
   "dependencies": {
+    "@graphql-typed-document-node/core": "^3.1.1",
     "@types/lodash": "^4.14.168",
     "@types/node": "^14.14.37",
     "@types/node-fetch": "^2.5.8",
@@ -11,7 +12,8 @@
     "dotenv": "^8.2.0",
     "envalid": "^7.1.0",
     "fp-ts": "^2.9.5",
-    "io-ts": "^2.2.16",
+    "graphql": "^16.2.0",
+    "graphql-request": "^3.7.0",
     "lodash": "^4.17.21",
     "make-promises-safe": "^5.1.0",
     "node-fetch": "^2.6.1",
@@ -20,6 +22,11 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "2.3.1",
+    "@graphql-codegen/introspection": "2.1.1",
+    "@graphql-codegen/typed-document-node": "^2.2.2",
+    "@graphql-codegen/typescript": "2.4.2",
+    "@graphql-codegen/typescript-operations": "2.2.2",
     "duplexify": "^4.1.1",
     "eslint": "^7.23.0",
     "pino-pretty": "^4.7.1",
@@ -29,6 +36,7 @@
   },
   "scripts": {
     "start": "NODE_ENV=development ts-node-dev --respawn --clear \"./src/index.ts\" | pino-pretty",
-    "build": "tsc"
+    "build": "tsc",
+    "codegen": "graphql-codegen --config codegen.yml"
   }
 }
