@@ -16,7 +16,7 @@ run()
   .then(() => process.exit(1));
 
 async function run() {
-  logger.info("Connecting to MQTT broker...");
+  logger.info("Connecting to MQTT broker with url %s...", mqttUrl);
   const mqttClient = await MQTT.connectAsync(mqttUrl);
   mqttClient.on("error", (e) => {
     logger.error(e);

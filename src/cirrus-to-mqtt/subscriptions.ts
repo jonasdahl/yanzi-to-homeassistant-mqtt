@@ -21,6 +21,7 @@ export async function cirrusSampleSubscriptionToMqtt({
     if (message.subscriptionType?.name !== name) continue;
 
     for (const resource of message.list ?? []) {
+      logger.debug("Got subscription data: %s", resource.resourceType);
       switch (resource.resourceType) {
         case "SampleList":
           handleSampleList(resource, { getMqttTopic, mqttClient });
