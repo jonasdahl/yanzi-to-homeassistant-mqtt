@@ -9,8 +9,8 @@ import { logger } from "./logger";
 
 run()
   .catch((e) => {
-    logger.error(e);
     logger.error("Error, shutting down");
+    logger.error(e);
   })
   .then(() => logger.info("Shutting down"))
   .then(() => process.exit(1));
