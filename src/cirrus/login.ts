@@ -34,8 +34,8 @@ export async function login({
       logger.debu("Logged in using accessToken");
     } else {
       logger.debug("Logged in using username/password (%s)", credentials.username);
+      await writeFile(sessionIdFilePath, response.sessionId);
     }
-    await writeFile(sessionIdFilePath, response.sessionId);
     return;
   }
   throw new Error("Login failed.");
