@@ -5,6 +5,7 @@ config();
 export const {
   CIRRUS_PASSWORD: cirrusPassword,
   CIRRUS_USERNAME: cirrusUsername,
+  CIRRUS_ACCESS_TOKEN: cirrusAccessToken,
   SESSION_ID_FILE: sessionIdFilePath,
   LOCATION_ID: locationId,
   DISCOVERY_TOPIC: discoveryTopicPrefix,
@@ -12,8 +13,9 @@ export const {
   CIRRUS_HOST: cirrusHost,
   LOG_LEVEL: logLevel,
 } = cleanEnv(process.env, {
-  CIRRUS_USERNAME: str({}),
-  CIRRUS_PASSWORD: str({}),
+  CIRRUS_USERNAME: str({ default: "" }),
+  CIRRUS_PASSWORD: str({ default: "" }),
+  CIRRUS_ACCESS_TOKEN: str({ default: "" }),
   SESSION_ID_FILE: str({ default: "/tmp/yanzi_session_id.txt" }),
   LOCATION_ID: str({}),
   DISCOVERY_TOPIC: str({ default: "homeassistant" }),

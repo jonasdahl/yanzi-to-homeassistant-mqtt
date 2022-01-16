@@ -3,7 +3,15 @@ import MQTT, { AsyncClient } from "async-mqtt";
 import "make-promises-safe";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
 import { login } from "./cirrus/login";
-import { cirrusHost, cirrusPassword, cirrusUsername, discoveryTopicPrefix, locationId, mqttUrl } from "./config";
+import {
+  cirrusAccessToken,
+  cirrusHost,
+  cirrusPassword,
+  cirrusUsername,
+  discoveryTopicPrefix,
+  locationId,
+  mqttUrl,
+} from "./config";
 import { homeAssistantMqttConfiguration } from "./home-assistant/mqtt-config";
 import { logger } from "./logger";
 
@@ -36,7 +44,14 @@ async function run() {
     logger.error("An error occurred in the Yanzi Socket. Exiting.");
     process.exit(1);
   });
-  await login({ socket, password: cirrusPassword, username: cirrusUsername });
+  if (cirrusAccessToken) {
+    await login({ socket, accessToken: cirrusAccessToken } as any);
+  } else {
+    if (!cirrusPassword) {
+      throw new Error("CIRRUS_ACCESS_TOKEN or CIRRUS_USERNAME + CIRRUS_PASSWORD must be in env");
+    }
+    await login({ socket, password: cirrusPassword, username: cirrusUsername });
+  }
   logger.info("Cirrus connected and authenticated as %s", cirrusUsername);
 
   logger.info(
