@@ -24,6 +24,7 @@ run()
   .then(() => process.exit(1));
 
 async function run() {
+  logger.info("Starting up...");
   logger.info("Connecting to MQTT broker with url %s...", mqttUrl);
   const mqttClient = await MQTT.connectAsync(mqttUrl);
   mqttClient.on("error", (e) => {
@@ -45,11 +46,13 @@ async function run() {
     process.exit(1);
   });
   if (cirrusAccessToken) {
+    logger.info("Logging in with accessToken");
     await login({ socket, accessToken: cirrusAccessToken } as any);
   } else {
     if (!cirrusPassword) {
       throw new Error("CIRRUS_ACCESS_TOKEN or CIRRUS_USERNAME + CIRRUS_PASSWORD must be in env");
     }
+    logger.info("Logging in with username + password (%s)", cirrusUsername);
     await login({ socket, password: cirrusPassword, username: cirrusUsername });
   }
   logger.info("Cirrus connected and authenticated as %s", cirrusUsername);
