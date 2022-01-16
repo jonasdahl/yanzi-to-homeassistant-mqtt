@@ -50,7 +50,7 @@ function handleSampleList(
 
   for (const sample of samples) {
     if (dataSourceAddress?.variableName?.name === "temperatureK" && sample.resourceType === "SampleTemp") {
-      // Cirrus doesn't sent temperatureC updates, so we need to augment that...
+      // Cirrus doesn't send temperatureC updates, so we need to augment that...
       publishSample({
         dataSourceAddress: {
           ...dataSourceAddress,

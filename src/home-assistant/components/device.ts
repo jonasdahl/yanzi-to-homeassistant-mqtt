@@ -19,7 +19,7 @@ export async function getDeviceConfig({
     connections: [],
     identifiers: [unit.unitAddress?.did!],
     name: unit.name,
-    configuration_url: `https://live.yanzi.cloud/locations/${locationId}/device/${did}?host=${cirrusHost}`,
+    configuration_url: `https://live.yanzi.cloud/locations/${locationId}/devices/${did}?host=${cirrusHost}`,
     model: productNames[unit.productType ?? ""] ?? unit.productType ?? unit.unitTypeFixed ?? "Yanzi Unit",
     manufacturer: "Yanzi by Altacogni",
     via_device: unit.gatewayDid,
