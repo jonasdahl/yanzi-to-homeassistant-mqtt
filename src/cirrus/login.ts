@@ -31,7 +31,7 @@ export async function login({
   const response = await socket.login(credentials);
   if (response.responseCode?.name === "success" && response.sessionId) {
     if ("accessToken" in credentials) {
-      logger.debu("Logged in using accessToken");
+      logger.debug("Logged in using accessToken");
     } else {
       logger.debug("Logged in using username/password (%s)", credentials.username);
       await writeFile(sessionIdFilePath, response.sessionId);
