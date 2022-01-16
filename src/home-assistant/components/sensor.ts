@@ -72,7 +72,14 @@ export async function getSensorConfig({
 }
 
 export function getEntityEnabledByDefault({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
-  return dataSourceAddress.variableName?.name === "temperatureK" ? false : true;
+  switch (dataSourceAddress?.variableName?.name) {
+    case "temperatureK":
+    case "statistics":
+      return false;
+
+    default:
+      return true;
+  }
 }
 
 export function getEntityCategory({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
