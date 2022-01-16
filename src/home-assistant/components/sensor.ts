@@ -52,6 +52,8 @@ export async function getSensorConfig({
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
+    entity_category: getEntityCategory({ dataSourceAddress }),
+    enabled_by_default: getEntityEnabledByDefault({ dataSourceAddress }),
     device: unit.deviceDid
       ? await getDeviceConfig({
           socket,
@@ -67,6 +69,35 @@ export async function getSensorConfig({
     ],
     availability_mode: "all",
   };
+}
+
+export function getEntityEnabledByDefault({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
+  return dataSourceAddress.variableName?.name === "temperatureK" ? false : true;
+}
+
+export function getEntityCategory({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
+  switch (dataSourceAddress?.variableName?.name) {
+    case "temperature":
+    case "temperatureC":
+    case "temperatureK":
+    case "temperatureF":
+    case "totalenergy":
+    case "totalApparentEnergy":
+    case "totalpower":
+    case "electricalPower":
+    case "totalpowerInst":
+    case "dmdTotalPower":
+    case "relativeHumidity":
+    case "pressure":
+    case "pressureValue":
+    case "volt":
+    case "illuminance":
+      return undefined;
+    case "battery":
+    case "statistics":
+    case "uplog":
+      return "diagnostic";
+  }
 }
 
 export function getDeviceClass({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {

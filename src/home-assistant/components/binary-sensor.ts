@@ -4,6 +4,7 @@ import { getUnitMetadata } from "../../cirrus/unit";
 import { getDeviceConfig } from "./device";
 import { getUnitOfMeasurement } from "../utils/unit-of-measurement";
 import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availability";
+import { getEntityCategory, getEntityEnabledByDefault } from "./sensor";
 
 export async function getBinarySensorConfig({
   dataSourceAddress,
@@ -58,6 +59,8 @@ export async function getBinarySensorConfig({
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
+    entity_category: getEntityCategory({ dataSourceAddress }),
+    enabled_by_default: getEntityEnabledByDefault({ dataSourceAddress }),
     device,
     unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, socket }),
 
