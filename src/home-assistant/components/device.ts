@@ -1,19 +1,18 @@
 import { getUnitMetadata } from "../../cirrus/unit";
 import { productNames } from "../../cirrus/products";
 import { UnitType } from "../../generated/graphql";
+import { YanziSocket } from "@yanzi/socket";
 
 export async function getDeviceConfig({
-  cirrusHost,
   did,
   locationId,
-  sessionId,
+  socket,
 }: {
-  cirrusHost: string;
+  socket: YanziSocket;
   did: string;
   locationId: string;
-  sessionId: string;
 }) {
-  const unit = await getUnitMetadata({ cirrusHost, did, locationId, sessionId });
+  const unit = await getUnitMetadata({ did, locationId, socket });
 
   return {
     connections: [],

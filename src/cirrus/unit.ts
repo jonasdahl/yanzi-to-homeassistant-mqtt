@@ -1,26 +1,24 @@
+import { YanziSocket } from "@yanzi/socket";
 import { GetUnitDocument } from "../generated/graphql";
 import { graphqlRequest } from "./graphql";
 import { getLocationMetadata } from "./location";
 
 export async function getUnitMetadata({
-  cirrusHost,
-  sessionId,
+  socket,
   locationId,
   did,
 }: {
-  sessionId: string;
-  cirrusHost: string;
+  socket: YanziSocket;
   locationId: string;
   did: string;
 }) {
   const data = await graphqlRequest({
-    cirrusHost,
-    sessionId,
+    socket,
     query: GetUnitDocument,
     variables: { locationId, did },
   });
 
-  const locationMetadata = await getLocationMetadata({ cirrusHost, locationId, sessionId });
+  const locationMetadata = await getLocationMetadata({ locationId, socket });
   const unit = data.location?.unit;
   const deviceDid =
     unit?.chassisParent?.unitTypeFixed === "physicalOrChassis"

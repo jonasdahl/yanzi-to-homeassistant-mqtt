@@ -21,19 +21,8 @@ export function getDataSourceAddress({
   };
 }
 
-export async function getAllDataSources({
-  cirrusHost,
-  locationId,
-  socket,
-}: {
-  cirrusHost: string;
-  locationId: string;
-  socket: YanziSocket;
-}) {
-  if (!socket.sessionId) {
-    throw new Error("Socket is not authenticated");
-  }
-  const data = await getLocationMetadata({ cirrusHost, locationId, sessionId: socket.sessionId });
+export async function getAllDataSources({ locationId, socket }: { locationId: string; socket: YanziSocket }) {
+  const data = await getLocationMetadata({ locationId, socket });
   const dataSourceAddresses = [
     ...flatten(
       data.units?.list.map(({ dataSources, ...unit }) =>
@@ -55,17 +44,14 @@ export async function getAllDataSources({
 }
 
 export async function getDataSourceMetadata({
-  cirrusHost,
-  sessionId,
+  socket,
   dataSourceAddress,
 }: {
-  sessionId: string;
-  cirrusHost: string;
+  socket: YanziSocket;
   dataSourceAddress: DataSourceAddress;
 }) {
   const data = await graphqlRequest({
-    cirrusHost,
-    sessionId,
+    socket,
     query: GetDataSourceAddressDocument,
     variables: { locationId: dataSourceAddress.locationId!, did: dataSourceAddress.did! },
   });

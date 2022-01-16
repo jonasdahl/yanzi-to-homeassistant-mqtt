@@ -35,7 +35,7 @@
     "typescript": "^4.2.3"
   },
   "scripts": {
-    "start": "NODE_ENV=development ts-node-dev --respawn --clear \"./src/index.ts\" | pino-pretty",
+    "start": "NODE_ENV=development ts-node-dev --respawn \"./src/index.ts\" | pino-pretty",
     "build": "tsc",
     "codegen": "graphql-codegen --config codegen.yml"
   }

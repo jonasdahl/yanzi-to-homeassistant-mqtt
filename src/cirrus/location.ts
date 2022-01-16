@@ -1,18 +1,10 @@
 import { graphqlRequest } from "./graphql";
 import { GetLocationUnitsDocument } from "../generated/graphql";
+import { YanziSocket } from "@yanzi/socket";
 
-export async function getLocationMetadata({
-  cirrusHost,
-  sessionId,
-  locationId,
-}: {
-  sessionId: string;
-  cirrusHost: string;
-  locationId: string;
-}) {
+export async function getLocationMetadata({ socket, locationId }: { socket: YanziSocket; locationId: string }) {
   const data = await graphqlRequest({
-    cirrusHost,
-    sessionId,
+    socket,
     variables: { locationId },
     query: GetLocationUnitsDocument,
   });

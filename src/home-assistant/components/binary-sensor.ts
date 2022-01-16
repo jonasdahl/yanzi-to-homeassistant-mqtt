@@ -1,4 +1,4 @@
-import { DataSourceAddress, DeviceUpState } from "@yanzi/socket";
+import { DataSourceAddress, DeviceUpState, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { getDeviceConfig } from "./device";
@@ -7,12 +7,10 @@ import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availabi
 
 export async function getBinarySensorConfig({
   dataSourceAddress,
-  cirrusHost,
-  sessionId,
+  socket,
 }: {
   dataSourceAddress: DataSourceAddress;
-  cirrusHost: string;
-  sessionId: string;
+  socket: YanziSocket;
 }) {
   const topic = defaultMqttTopicMapper({ dataSourceAddress });
 
@@ -24,10 +22,9 @@ export async function getBinarySensorConfig({
   }
 
   const unit = await getUnitMetadata({
-    cirrusHost,
+    socket,
     did: dataSourceAddress.did,
     locationId: dataSourceAddress.locationId,
-    sessionId,
   });
 
   const chassisAvailabilityTopic = getAvailabilityTopic({
@@ -37,10 +34,9 @@ export async function getBinarySensorConfig({
 
   const device = unit.deviceDid
     ? await getDeviceConfig({
-        cirrusHost,
+        socket,
         did: unit.deviceDid,
         locationId: dataSourceAddress.locationId,
-        sessionId,
       })
     : undefined;
 
@@ -63,7 +59,7 @@ export async function getBinarySensorConfig({
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
     device,
-    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, cirrusHost, sessionId }),
+    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, socket }),
 
     availability: [
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
