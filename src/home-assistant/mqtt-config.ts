@@ -129,13 +129,14 @@ async function setupTotalPowerInst({
   await mqttClient.publish(instantPowerDiscoveryTopic, JSON.stringify(instantPowerConfig), { retain: true });
 
   const totalEnergyDiscoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}-total-energy/config`;
-  const totalEnergyConfig: typeof defaultConfig = {
+  const totalEnergyConfig: typeof defaultConfig & { state_class: string } = {
     ...defaultConfig,
     name: defaultConfig.name + " total energy",
     unique_id: defaultConfig.unique_id + " total energy",
     value_template: "{{ (value_json.totalEnergy / 1000 / 1000 / 3600) | float | round(2) }}",
     unit_of_measurement: "kWh",
     device_class: "energy",
+    state_class: "total_increasing",
   };
   logger.debug("Advertising totalEnergy sensor on topic: %s", totalEnergyDiscoveryTopic);
   await mqttClient.publish(totalEnergyDiscoveryTopic, JSON.stringify(totalEnergyConfig), { retain: true });
