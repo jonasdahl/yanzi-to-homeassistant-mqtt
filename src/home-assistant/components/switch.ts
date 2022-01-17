@@ -43,7 +43,7 @@ export async function getSwitchConfig({
     : undefined;
 
   return {
-    value_template: "{{ value_json.outputValue }}",
+    value_template: "{{ value_json.value.name }}",
     availability: [
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
       { topic: gatewayAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
