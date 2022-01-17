@@ -6,6 +6,7 @@ import { logger } from "../logger";
 import { getBinarySensorConfig } from "./components/binary-sensor";
 import { getDeviceTriggerConfig } from "./components/device-trigger";
 import { getSensorConfig } from "./components/sensor";
+import { getSwitchConfig } from "./components/switch";
 
 export async function homeAssistantMqttConfiguration({
   mqttClient,
@@ -53,6 +54,9 @@ async function discoverDevices({
         continue;
       case "totalpowerInst":
         setupTotalPowerInst({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
+      case "onOffOutput":
+        setupOnOffOutput({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
         continue;
       default: {
         setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
@@ -135,6 +139,23 @@ async function setupTotalPowerInst({
   await mqttClient.publish(totalEnergyDiscoveryTopic, JSON.stringify(totalEnergyConfig), { retain: true });
 
   await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+}
+
+async function setupOnOffOutput({
+  socket,
+  mqttClient,
+  discoveryTopicPrefix,
+  dataSourceAddress,
+}: {
+  socket: YanziSocket;
+  mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
+  dataSourceAddress: DataSourceAddress;
+}) {
+  const topic = `${discoveryTopicPrefix}/switch/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}/config`;
+  const config = await getSwitchConfig({ dataSourceAddress, socket });
+  logger.debug("Advertising switch on topic: %s", topic);
+  await mqttClient.publish(topic, JSON.stringify(config), { retain: true });
 }
 
 async function setupMotion({

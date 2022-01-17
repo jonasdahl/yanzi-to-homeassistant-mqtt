@@ -1,7 +1,8 @@
 import { createSocket, YanziSocket } from "@yanzi/socket";
-import MQTT, { AsyncClient } from "async-mqtt";
+import MQTT, { AsyncClient, AsyncMqttClient } from "async-mqtt";
 import "make-promises-safe";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
+import { graphqlRequest } from "./cirrus/graphql";
 import { login } from "./cirrus/login";
 import {
   cirrusAccessToken,
@@ -12,6 +13,7 @@ import {
   locationId,
   mqttUrl,
 } from "./config";
+import { ControlDeviceDocument, OutputValue } from "./generated/graphql";
 import { homeAssistantMqttConfiguration } from "./home-assistant/mqtt-config";
 import { logger } from "./logger";
 
@@ -63,6 +65,47 @@ async function run() {
   return Promise.race([
     cirrusSampleSubscriptionToMqtt({ mqttClient, socket, locationId }),
     homeAssistantMqttConfiguration({ mqttClient, socket, locationId, discoveryTopicPrefix }),
+    mqttToCirrus({ mqttClient, socket, locationId }),
   ]);
   // TODO Maybe while (true) instead of crashing process on every fail?
+}
+
+async function mqttToCirrus({
+  mqttClient,
+  socket,
+  locationId: lid,
+}: {
+  mqttClient: AsyncMqttClient;
+  socket: YanziSocket;
+  locationId: string;
+}) {
+  await mqttClient.subscribe("yanzi/+/+/+/control");
+  mqttClient.on("message", async (topic, payload) => {
+    const matches = topic.match(/^yanzi\/(.*)\/(.*)\/(.*)\/control$/);
+    if (!matches) {
+      return;
+    }
+    const locationId = matches[1];
+    const did = matches[2];
+    const variableName = matches[3];
+    if (lid !== locationId) {
+      return;
+    }
+    const data = payload.toString("utf-8");
+    if (data === "onn") {
+      await graphqlRequest({
+        query: ControlDeviceDocument,
+        variables: { locationId, did, value: OutputValue.Onn },
+        socket,
+      });
+    }
+    if (data === "off") {
+      await graphqlRequest({
+        query: ControlDeviceDocument,
+        variables: { locationId, did, value: OutputValue.Off },
+        socket,
+      });
+    }
+  });
+  return new Promise(() => {});
 }
