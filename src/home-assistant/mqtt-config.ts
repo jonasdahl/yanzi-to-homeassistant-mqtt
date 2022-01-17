@@ -131,7 +131,7 @@ async function setupTotalPowerInst({
     ...defaultConfig,
     name: defaultConfig.name + " totalEnergy",
     unique_id: defaultConfig.unique_id + " totalEnergy",
-    value_template: "{{ value_json.totalEnergy / 1000 / 1000 }}",
+    value_template: "{{ value_json.totalEnergy / 1000 / 1000 / 3600 }}",
     unit_of_measurement: "kWh",
     device_class: "energy",
   };
