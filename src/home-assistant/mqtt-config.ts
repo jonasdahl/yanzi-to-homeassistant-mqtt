@@ -2,6 +2,8 @@ import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { AsyncClient } from "async-mqtt";
 import { publishLatestSamples } from "../cirrus-to-mqtt/latest";
 import { getAllDataSources } from "../cirrus/data-sources";
+import { graphqlRequest } from "../cirrus/graphql";
+import { ControlDeviceDocument, OutputValue } from "../generated/graphql";
 import { logger } from "../logger";
 import { getBinarySensorConfig } from "./components/binary-sensor";
 import { getDeviceTriggerConfig } from "./components/device-trigger";
@@ -117,8 +119,8 @@ async function setupTotalPowerInst({
   const defaultConfig = await getSensorConfig({ dataSourceAddress, socket });
   const instantPowerConfig: typeof defaultConfig = {
     ...defaultConfig,
-    name: defaultConfig.name + " instantPower",
-    unique_id: defaultConfig.unique_id + " instantPower",
+    name: defaultConfig.name + " power",
+    unique_id: defaultConfig.unique_id + " power",
     value_template: "{{ value_json.instantPower }}",
     unit_of_measurement: "W",
     device_class: "power",
@@ -129,16 +131,14 @@ async function setupTotalPowerInst({
   const totalEnergyDiscoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}-total-energy/config`;
   const totalEnergyConfig: typeof defaultConfig = {
     ...defaultConfig,
-    name: defaultConfig.name + " totalEnergy",
-    unique_id: defaultConfig.unique_id + " totalEnergy",
+    name: defaultConfig.name + " total energy",
+    unique_id: defaultConfig.unique_id + " total energy",
     value_template: "{{ (value_json.totalEnergy / 1000 / 1000 / 3600) | float | round(2) }}",
     unit_of_measurement: "kWh",
     device_class: "energy",
   };
   logger.debug("Advertising totalEnergy sensor on topic: %s", totalEnergyDiscoveryTopic);
   await mqttClient.publish(totalEnergyDiscoveryTopic, JSON.stringify(totalEnergyConfig), { retain: true });
-
-  await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
 }
 
 async function setupOnOffOutput({
@@ -212,11 +212,40 @@ async function discoverDevicesOnHomeAssistantStartup({
 }) {
   const birthMessageTopic = "homeassistant/status";
   await mqttClient.subscribe(birthMessageTopic);
-  mqttClient.on("message", (topic, payload) => {
-    logger.info("Got birth message on %s topic: %s", topic, payload);
+  // Setup handler for on/off messages
+  await mqttClient.subscribe("yanzi/+/+/+/control");
+  mqttClient.on("message", async (topic, payload) => {
     if (topic === birthMessageTopic && payload.toString("utf-8") === "online") {
+      logger.info("Got birth message on %s topic: %s", topic, payload);
       logger.info("Discovering devices since birth message indicated an online status");
       discoverDevices({ socket, mqttClient, locationId, discoveryTopicPrefix });
+      return;
+    }
+
+    const matches = topic.match(/^yanzi\/(.*)\/(.*)\/(.*)\/control$/);
+    if (!matches) {
+      return;
+    }
+    const lid = matches[1];
+    const did = matches[2];
+    const variableName = matches[3];
+    if (lid !== locationId) {
+      return;
+    }
+    const data = payload.toString("utf-8");
+    if (data === "on") {
+      await graphqlRequest({
+        query: ControlDeviceDocument,
+        variables: { locationId, did, value: OutputValue.Onn },
+        socket,
+      });
+    }
+    if (data === "off") {
+      await graphqlRequest({
+        query: ControlDeviceDocument,
+        variables: { locationId, did, value: OutputValue.Off },
+        socket,
+      });
     }
   });
 

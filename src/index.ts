@@ -65,47 +65,6 @@ async function run() {
   return Promise.race([
     cirrusSampleSubscriptionToMqtt({ mqttClient, socket, locationId }),
     homeAssistantMqttConfiguration({ mqttClient, socket, locationId, discoveryTopicPrefix }),
-    mqttToCirrus({ mqttClient, socket, locationId }),
   ]);
   // TODO Maybe while (true) instead of crashing process on every fail?
-}
-
-async function mqttToCirrus({
-  mqttClient,
-  socket,
-  locationId: lid,
-}: {
-  mqttClient: AsyncMqttClient;
-  socket: YanziSocket;
-  locationId: string;
-}) {
-  await mqttClient.subscribe("yanzi/+/+/+/control");
-  mqttClient.on("message", async (topic, payload) => {
-    const matches = topic.match(/^yanzi\/(.*)\/(.*)\/(.*)\/control$/);
-    if (!matches) {
-      return;
-    }
-    const locationId = matches[1];
-    const did = matches[2];
-    const variableName = matches[3];
-    if (lid !== locationId) {
-      return;
-    }
-    const data = payload.toString("utf-8");
-    if (data === "on") {
-      await graphqlRequest({
-        query: ControlDeviceDocument,
-        variables: { locationId, did, value: OutputValue.Onn },
-        socket,
-      });
-    }
-    if (data === "off") {
-      await graphqlRequest({
-        query: ControlDeviceDocument,
-        variables: { locationId, did, value: OutputValue.Off },
-        socket,
-      });
-    }
-  });
-  return new Promise(() => {});
 }
