@@ -51,6 +51,9 @@ async function discoverDevices({
       case "unitState":
         setupUnitState({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
         continue;
+      case "totalpowerInst":
+        setupTotalPowerInst({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+        continue;
       default: {
         setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
         continue;
@@ -91,6 +94,45 @@ async function setupUnitState({
   const configPayload = await getBinarySensorConfig({ dataSourceAddress, socket });
   logger.debug("Advertising binary_sensor on topic: %s", discoveryTopic);
   await mqttClient.publish(discoveryTopic, JSON.stringify(configPayload), { retain: true });
+
+  await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
+}
+
+async function setupTotalPowerInst({
+  socket,
+  mqttClient,
+  discoveryTopicPrefix,
+  dataSourceAddress,
+}: {
+  socket: YanziSocket;
+  mqttClient: AsyncClient;
+  discoveryTopicPrefix: string;
+  dataSourceAddress: DataSourceAddress;
+}) {
+  const instantPowerDiscoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}-instant-power/config`;
+  const defaultConfig = await getSensorConfig({ dataSourceAddress, socket });
+  const instantPowerConfig: typeof defaultConfig = {
+    ...defaultConfig,
+    name: defaultConfig.name + " instantPower",
+    unique_id: defaultConfig.unique_id + " instantPower",
+    value_template: "{{ value_json.instantPower }}",
+    unit_of_measurement: "W",
+    device_class: "power",
+  };
+  logger.debug("Advertising instantPower sensor on topic: %s", instantPowerDiscoveryTopic);
+  await mqttClient.publish(instantPowerDiscoveryTopic, JSON.stringify(instantPowerConfig), { retain: true });
+
+  const totalEnergyDiscoveryTopic = `${discoveryTopicPrefix}/sensor/${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}-total-energy/config`;
+  const totalEnergyConfig: typeof defaultConfig = {
+    ...defaultConfig,
+    name: defaultConfig.name + " totalEnergy",
+    unique_id: defaultConfig.unique_id + " totalEnergy",
+    value_template: "{{ value_json.totalEnergy / 1000 / 1000 }}",
+    unit_of_measurement: "kWh",
+    device_class: "energy",
+  };
+  logger.debug("Advertising totalEnergy sensor on topic: %s", totalEnergyDiscoveryTopic);
+  await mqttClient.publish(totalEnergyDiscoveryTopic, JSON.stringify(totalEnergyConfig), { retain: true });
 
   await setupGenericSensor({ dataSourceAddress, discoveryTopicPrefix, mqttClient, socket });
 }
