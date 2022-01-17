@@ -1,4 +1,4 @@
-import { DataSourceAddress, DeviceUpState, YanziSocket } from "@yanzi/socket";
+import { DataSourceAddress, DeviceUpState, SampleOnOff, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { getDeviceConfig } from "./device";
@@ -59,6 +59,6 @@ export async function getSwitchConfig({
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     payload_off: "off",
-    payload_on: "onn",
+    payload_on: "on",
   };
 }

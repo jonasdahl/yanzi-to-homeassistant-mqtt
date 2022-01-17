@@ -92,7 +92,7 @@ async function mqttToCirrus({
       return;
     }
     const data = payload.toString("utf-8");
-    if (data === "onn") {
+    if (data === "on") {
       await graphqlRequest({
         query: ControlDeviceDocument,
         variables: { locationId, did, value: OutputValue.Onn },
