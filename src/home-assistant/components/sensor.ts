@@ -1,27 +1,16 @@
-import {
-  DataSourceAddress,
-  SampleCommunicationStatistics,
-  SampleNodeStatistics,
-  SamplePowerUpdate,
-  SampleSiteOnlineStatus,
-  SampleStatus,
-  SampleUpState,
-} from "@yanzi/socket";
+import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { logger } from "../../logger";
 import { getAvailabilityTopic, onlinePayload, offlinePayload } from "../availability";
 import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
 import { getDeviceConfig } from "./device";
 
 export async function getSensorConfig({
   dataSourceAddress,
-  cirrusHost,
-  sessionId,
+  socket,
 }: {
   dataSourceAddress: DataSourceAddress;
-  cirrusHost: string;
-  sessionId: string;
+  socket: YanziSocket;
 }) {
   const topic = defaultMqttTopicMapper({ dataSourceAddress });
 
@@ -33,14 +22,13 @@ export async function getSensorConfig({
   }
 
   const unit = await getUnitMetadata({
-    cirrusHost,
+    socket,
     did: dataSourceAddress.did,
     locationId: dataSourceAddress.locationId,
-    sessionId,
   });
 
   const chassisAvailabilityTopic = getAvailabilityTopic({
-    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
+    did: unit.chassisParent?.unitAddress?.did ?? dataSourceAddress.did,
   });
   const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
 
@@ -64,15 +52,16 @@ export async function getSensorConfig({
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
+    entity_category: getEntityCategory({ dataSourceAddress }),
+    enabled_by_default: getEntityEnabledByDefault({ dataSourceAddress }),
     device: unit.deviceDid
       ? await getDeviceConfig({
-          cirrusHost,
+          socket,
           did: unit.deviceDid,
           locationId: dataSourceAddress.locationId,
-          sessionId,
         })
       : undefined,
-    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, cirrusHost, sessionId }),
+    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, socket }),
 
     availability: [
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
@@ -80,6 +69,42 @@ export async function getSensorConfig({
     ],
     availability_mode: "all",
   };
+}
+
+export function getEntityEnabledByDefault({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
+  switch (dataSourceAddress?.variableName?.name) {
+    case "temperatureK":
+    case "statistics":
+      return false;
+
+    default:
+      return true;
+  }
+}
+
+export function getEntityCategory({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {
+  switch (dataSourceAddress?.variableName?.name) {
+    case "temperature":
+    case "temperatureC":
+    case "temperatureK":
+    case "temperatureF":
+    case "totalenergy":
+    case "totalApparentEnergy":
+    case "totalpower":
+    case "electricalPower":
+    case "totalpowerInst":
+    case "dmdTotalPower":
+    case "relativeHumidity":
+    case "pressure":
+    case "pressureValue":
+    case "volt":
+    case "illuminance":
+      return undefined;
+    case "battery":
+    case "statistics":
+    case "uplog":
+      return "diagnostic";
+  }
 }
 
 export function getDeviceClass({ dataSourceAddress }: { dataSourceAddress: DataSourceAddress }) {

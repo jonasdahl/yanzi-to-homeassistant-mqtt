@@ -1,0 +1,42 @@
+query GetLocationUnits($locationId: String!) {
+  location(locationId: $locationId) {
+    locationId
+    gateway {
+      nameSetByUser
+      unitAddress {
+        did
+      }
+      dataSources {
+        variableName
+        siUnit
+      }
+    }
+    units(first: 10000) {
+      list {
+        chassisParent {
+          name
+          productType
+          unitAddress {
+            did
+          }
+        }
+        nameSetByUser
+        unitAddress {
+          did
+        }
+        dataSources {
+          variableName
+          siUnit
+        }
+      }
+    }
+    inventory {
+      list {
+        unitAddress {
+          did
+        }
+        version
+      }
+    }
+  }
+}

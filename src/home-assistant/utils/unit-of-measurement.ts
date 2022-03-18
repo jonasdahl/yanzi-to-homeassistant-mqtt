@@ -1,14 +1,12 @@
-import { DataSourceAddress } from "@yanzi/socket";
+import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { getDataSourceMetadata } from "../../cirrus/data-sources";
 
 export async function getUnitOfMeasurement({
   dataSourceAddress,
-  cirrusHost,
-  sessionId,
+  socket,
 }: {
   dataSourceAddress: DataSourceAddress;
-  cirrusHost: string;
-  sessionId: string;
+  socket: YanziSocket;
 }) {
   if (dataSourceAddress.variableName?.name === "battery") {
     return "%";
@@ -16,7 +14,7 @@ export async function getUnitOfMeasurement({
   if (dataSourceAddress.variableName?.name === "motion") {
     return undefined;
   }
-  const res = await getDataSourceMetadata({ dataSourceAddress, cirrusHost, sessionId });
+  const res = await getDataSourceMetadata({ dataSourceAddress, socket });
   const siUnit = res?.siUnit?.trim();
   switch (siUnit) {
     case "NA":

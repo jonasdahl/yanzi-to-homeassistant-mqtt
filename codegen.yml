@@ -1,0 +1,16 @@
+overwrite: true
+schema:
+  # - https://eu.yanzi.cloud/graphql:
+  #     headers:
+  #       Authorization: "Bearer am9uYXMuZGFobEB5YW56aW5ldHdvcmtzLmNvbTpVVUlELUM0OThBMkE5MDUyRjRDMzRBMjE4QTg2OEVERkVERkNGOi0zNTY0NzAyNjc1ODg4NzQ2MjgzMTYwMjM5MDI2MjAzNDc4NzU_"
+  - "cirrus.schema.json"
+documents: "src/**/*.graphql"
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - typed-document-node
+  ./cirrus.schema.json:
+    plugins:
+      - "introspection"

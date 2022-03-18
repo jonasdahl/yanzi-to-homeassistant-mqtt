@@ -1,4 +1,4 @@
-import { DataSourceAddress } from "@yanzi/socket";
+import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
@@ -6,12 +6,10 @@ import { getDeviceConfig } from "./device";
 
 export async function getDeviceTriggerConfig({
   dataSourceAddress,
-  cirrusHost,
-  sessionId,
+  socket,
 }: {
   dataSourceAddress: DataSourceAddress;
-  cirrusHost: string;
-  sessionId: string;
+  socket: YanziSocket;
 }) {
   const topic = defaultMqttTopicMapper({ dataSourceAddress });
 
@@ -23,10 +21,9 @@ export async function getDeviceTriggerConfig({
   }
 
   const unit = await getUnitMetadata({
-    cirrusHost,
+    socket,
     did: dataSourceAddress.did,
     locationId: dataSourceAddress.locationId,
-    sessionId,
   });
 
   return {
@@ -36,10 +33,9 @@ export async function getDeviceTriggerConfig({
     subtype: "PIR",
     device: unit.deviceDid
       ? await getDeviceConfig({
-          cirrusHost,
+          socket,
           did: unit.deviceDid,
           locationId: dataSourceAddress.locationId,
-          sessionId,
         })
       : undefined,
   };

@@ -1,40 +1,35 @@
-import fetch from "node-fetch";
-import * as t from "io-ts";
 import { QueryClient } from "react-query/core";
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
+import { YanziSocket } from "@yanzi/socket";
+import { print } from "graphql";
+import { Exact } from "../generated/graphql";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30 * 1000, cacheTime: 30 * 1000 } } });
 
-export async function graphqlRequest<T>({
-  cirrusHost,
-  sessionId,
+export async function graphqlRequest<TData, TVariables extends { locationId: string }>({
   query,
   variables,
-  dataType,
+  socket,
 }: {
-  sessionId: string;
-  cirrusHost: string;
-  query: string;
-  variables: Record<string, string>;
-  dataType: t.Type<T>;
+  query: TypedDocumentNode<TData, Exact<TVariables>>;
+  variables: TVariables;
+  socket: YanziSocket;
 }) {
   const data = await queryClient.fetchQuery({
-    queryKey: ["graphql-query", cirrusHost, sessionId, variables, query],
+    queryKey: ["graphql-query", variables, query],
     queryFn: async () => {
-      const res = await fetch(`https://${cirrusHost}/graphql`, {
-        method: "POST",
-        headers: { authorization: `bearer ${sessionId}`, "content-type": "text/plain; charset=UTF-8" },
-        body: JSON.stringify({ query, variables }),
-      }).catch((e) => {
-        console.error(e);
+      const response = await socket.request({
+        messageType: "GraphQLRequest",
+        locationAddress: { resourceType: "LocationAddress", locationId: variables.locationId },
+        isLS: false,
+        query: print(query),
+        vars: JSON.stringify(variables),
       });
-      if (!res || !res.ok) {
-        throw new Error("Failed to fetch: " + (res ? `${res.status} ${res.statusText}` : "No response."));
+      const res = JSON.parse(response.result ?? "");
+      if (res.error || res.errors || !res.data) {
+        throw new Error("Result was not clean");
       }
-      const json = await res.json();
-      if (!dataType.is(json)) {
-        throw new Error("Invalid data format: " + JSON.stringify(json));
-      }
-      return json;
+      return res.data as TData;
     },
     retry: 2,
     staleTime: 30 * 1000,

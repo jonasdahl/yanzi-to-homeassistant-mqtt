@@ -1,0 +1,7 @@
+mutation ControlDevice($locationId: String!, $did: String!, $value: OutputValue!) {
+  location(locationId: $locationId) {
+    unit(did: $did) {
+      controlBinary(value: $value)
+    }
+  }
+}

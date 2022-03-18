@@ -21,6 +21,7 @@ export async function cirrusSampleSubscriptionToMqtt({
     if (message.subscriptionType?.name !== name) continue;
 
     for (const resource of message.list ?? []) {
+      logger.debug("Got subscription data: %s", resource.resourceType);
       switch (resource.resourceType) {
         case "SampleList":
           handleSampleList(resource, { getMqttTopic, mqttClient });
@@ -49,7 +50,7 @@ function handleSampleList(
 
   for (const sample of samples) {
     if (dataSourceAddress?.variableName?.name === "temperatureK" && sample.resourceType === "SampleTemp") {
-      // Cirrus doesn't sent temperatureC updates, so we need to augment that...
+      // Cirrus doesn't send temperatureC updates, so we need to augment that...
       publishSample({
         dataSourceAddress: {
           ...dataSourceAddress,

@@ -5,13 +5,16 @@ import { readFile, writeFile } from "fs/promises";
 
 export async function login({
   socket,
-  username,
-  password,
+  ...credentials
 }: {
   socket: YanziSocket;
-  username: string;
-  password: string;
-}) {
+} & (
+  | {
+      username: string;
+      password: string;
+    }
+  | { accessToken: string }
+)) {
   try {
     const sessionIdFileContents = await readFile(sessionIdFilePath);
     const sessionId = sessionIdFileContents.toString("utf-8");
@@ -25,10 +28,14 @@ export async function login({
     logger.error(e);
   }
 
-  const response = await socket.login({ username, password });
+  const response = await socket.login(credentials);
   if (response.responseCode?.name === "success" && response.sessionId) {
-    logger.debug("Logged in using username/password");
-    await writeFile(sessionIdFilePath, response.sessionId);
+    if ("accessToken" in credentials) {
+      logger.debug("Logged in using accessToken");
+    } else {
+      logger.debug("Logged in using username/password (%s)", credentials.username);
+      await writeFile(sessionIdFilePath, response.sessionId);
+    }
     return;
   }
   throw new Error("Login failed.");

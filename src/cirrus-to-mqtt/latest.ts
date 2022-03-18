@@ -14,8 +14,7 @@ export async function publishLatestSamples({
   mqttClient: AsyncClient;
   dataSourceAddress: DataSourceAddress;
 }) {
-  const cirrusHost = new URL(socket.url).host;
-  const allDataSources = await getAllDataSources({ cirrusHost, locationId: dataSourceAddress.locationId!, socket });
+  const allDataSources = await getAllDataSources({ locationId: dataSourceAddress.locationId!, socket });
   const dataSourceAddresses = allDataSources.filter(
     (dsa) =>
       (dataSourceAddress.locationId ? dataSourceAddress.locationId === dsa.locationId : true) &&

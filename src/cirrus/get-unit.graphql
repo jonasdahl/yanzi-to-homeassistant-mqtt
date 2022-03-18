@@ -1,0 +1,35 @@
+query GetUnit($locationId: String!, $did: String!) {
+  location(locationId: $locationId) {
+    gateway {
+      unitAddress {
+        did
+      }
+    }
+    unit(did: $did) {
+      unitTypeFixed
+      name
+      nameSetByUser
+      unitAddress {
+        did
+      }
+      productType
+      dataSources {
+        variableName
+        siUnit
+      }
+      chassisParent {
+        name
+        unitAddress {
+          did
+        }
+        unitTypeFixed
+        assetParent {
+          name
+        }
+      }
+      assetParent {
+        name
+      }
+    }
+  }
+}

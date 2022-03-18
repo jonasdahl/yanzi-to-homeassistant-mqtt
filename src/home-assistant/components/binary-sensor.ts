@@ -1,18 +1,17 @@
-import { DataSourceAddress, DeviceUpState } from "@yanzi/socket";
+import { DataSourceAddress, DeviceUpState, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
 import { getDeviceConfig } from "./device";
 import { getUnitOfMeasurement } from "../utils/unit-of-measurement";
 import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availability";
+import { getEntityCategory, getEntityEnabledByDefault } from "./sensor";
 
 export async function getBinarySensorConfig({
   dataSourceAddress,
-  cirrusHost,
-  sessionId,
+  socket,
 }: {
   dataSourceAddress: DataSourceAddress;
-  cirrusHost: string;
-  sessionId: string;
+  socket: YanziSocket;
 }) {
   const topic = defaultMqttTopicMapper({ dataSourceAddress });
 
@@ -24,23 +23,21 @@ export async function getBinarySensorConfig({
   }
 
   const unit = await getUnitMetadata({
-    cirrusHost,
+    socket,
     did: dataSourceAddress.did,
     locationId: dataSourceAddress.locationId,
-    sessionId,
   });
 
   const chassisAvailabilityTopic = getAvailabilityTopic({
-    did: unit.chassisParent?.unitAddress.did ?? dataSourceAddress.did,
+    did: unit.chassisParent?.unitAddress?.did ?? dataSourceAddress.did,
   });
   const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
 
   const device = unit.deviceDid
     ? await getDeviceConfig({
-        cirrusHost,
+        socket,
         did: unit.deviceDid,
         locationId: dataSourceAddress.locationId,
-        sessionId,
       })
     : undefined;
 
@@ -62,8 +59,10 @@ export async function getBinarySensorConfig({
     name: unit.name + ` ${dataSourceAddress.variableName?.name}`,
     unique_id: `${dataSourceAddress.did}-${dataSourceAddress.variableName?.name}`,
     device_class: getDeviceClass({ dataSourceAddress }),
+    entity_category: getEntityCategory({ dataSourceAddress }),
+    enabled_by_default: getEntityEnabledByDefault({ dataSourceAddress }),
     device,
-    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, cirrusHost, sessionId }),
+    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, socket }),
 
     availability: [
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
