@@ -30,7 +30,7 @@ export async function getDeviceTriggerConfig({
     topic,
     type: "motion triggered",
     payload: "triggered",
-    payload_template: `{% if value_json.timeLastMotion > as_timestamp(now()) * 1000 - 60 * 1000 %}triggered{% else %}void{% endif %}`,
+    value_template: `{% if value_json.timeLastMotion > as_timestamp(now()) * 1000 - 60 * 1000 %}triggered{% else %}void{% endif %}`,
     subtype: "PIR",
     device: unit.deviceDid
       ? await getDeviceConfig({
