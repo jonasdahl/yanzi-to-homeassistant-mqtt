@@ -1,7 +1,6 @@
 import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
 import { getDeviceConfig } from "./device";
 
 export async function getDeviceTriggerConfig({
@@ -30,6 +29,8 @@ export async function getDeviceTriggerConfig({
     automation_type: "trigger",
     topic,
     type: "motion triggered",
+    payload: "triggered",
+    payload_template: `{% if value_json.timeLastMotion > as_timestamp(now()) * 1000 - 60 * 1000 %}triggered{% else %}void{% endif %}`,
     subtype: "PIR",
     device: unit.deviceDid
       ? await getDeviceConfig({
