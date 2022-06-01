@@ -24,7 +24,7 @@ export async function login({
       await writeFile(sessionIdFilePath, response.sessionId);
       return;
     }
-  } catch (e) {
+  } catch (e: any) {
     logger.error(e);
   }
 

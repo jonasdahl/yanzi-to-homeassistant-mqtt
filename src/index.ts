@@ -1,6 +1,7 @@
 import { createSocket } from "@yanzi/socket";
 import MQTT from "async-mqtt";
 import "make-promises-safe";
+import { readFileSync } from "node:fs";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
 import { login } from "./cirrus/login";
 import {
@@ -10,6 +11,10 @@ import {
   cirrusUsername,
   discoveryTopicPrefix,
   locationId,
+  mqttCaPath,
+  mqttCertPath,
+  mqttKeyPath,
+  mqttProtocol,
   mqttUrl,
 } from "./config";
 import { homeAssistantMqttConfiguration } from "./home-assistant/mqtt-config";
@@ -26,7 +31,31 @@ run()
 async function run() {
   logger.info("Starting up...");
   logger.info("Connecting to MQTT broker with url %s...", mqttUrl);
-  const mqttClient = await MQTT.connectAsync(mqttUrl);
+
+  const ca = mqttCaPath ? readFileSync(mqttCaPath) : undefined;
+  logger.info("Using CA: %s", ca ? "yes" : "no");
+  const cert = mqttCertPath ? readFileSync(mqttCertPath) : undefined;
+  logger.info("Using cert: %s", cert ? "yes" : "no");
+  const key = mqttKeyPath ? readFileSync(mqttKeyPath) : undefined;
+  logger.info("Using key: %s", key ? "yes" : "no");
+  const protocol = (mqttProtocol ? (mqttProtocol as any) : undefined) ?? "mqtt";
+  logger.info("Protocol: %s", protocol);
+
+  const extra = {
+    checkServerIdentity: () => {
+      return null;
+    },
+  };
+  const mqttClient = await MQTT.connectAsync(mqttUrl, {
+    ca,
+    cert,
+    key,
+    protocol,
+    ...extra,
+  });
+  mqttClient.on("reconnect", () => {
+    logger.warn("MQTT client reconnected");
+  });
   mqttClient.on("error", (e) => {
     logger.error(e);
     logger.error("An error occurred in the MQTT client. Exiting.");

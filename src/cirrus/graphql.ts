@@ -24,6 +24,9 @@ export async function graphqlRequest<TData, TVariables extends { locationId: str
         isLS: false,
         query: print(query),
         vars: JSON.stringify(variables),
+        address: {
+          resourceType: 'LocationAddress',
+        }
       });
       const res = JSON.parse(response.result ?? "");
       if (res.error || res.errors || !res.data) {
