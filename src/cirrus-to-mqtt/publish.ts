@@ -1,8 +1,8 @@
 import { DataSourceAddress, DeviceUpState, SampleDTO } from "@yanzi/socket";
 import { AsyncClient } from "async-mqtt";
+import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../home-assistant/availability";
 import { logger } from "../logger";
 import { defaultMqttTopicMapper } from "./subscriptions";
-import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../home-assistant/availability";
 
 export function publishSample({
   mqttClient,

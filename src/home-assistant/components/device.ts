@@ -1,8 +1,8 @@
-import { getUnitMetadata } from "../../cirrus/unit";
-import { productNames } from "../../cirrus/products";
-import { UnitType } from "../../generated/graphql";
 import { YanziSocket } from "@yanzi/socket";
+import { productNames } from "../../cirrus/products";
+import { getUnitMetadata } from "../../cirrus/unit";
 import { cirrusHost } from "../../config";
+import { UnitType } from "../../generated/graphql";
 
 export async function getDeviceConfig({
   did,

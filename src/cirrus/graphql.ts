@@ -1,7 +1,7 @@
-import { QueryClient } from "react-query/core";
 import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 import { YanziSocket } from "@yanzi/socket";
 import { print } from "graphql";
+import { QueryClient } from "react-query/core";
 import { Exact } from "../generated/graphql";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30 * 1000, cacheTime: 30 * 1000 } } });

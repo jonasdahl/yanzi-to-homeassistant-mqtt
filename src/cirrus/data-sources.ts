@@ -1,8 +1,8 @@
 import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { flatten } from "lodash";
+import { GetDataSourceAddressDocument } from "../generated/graphql";
 import { graphqlRequest } from "./graphql";
 import { getLocationMetadata } from "./location";
-import { GetDataSourceAddressDocument } from "../generated/graphql";
 
 export function getDataSourceAddress({
   did,

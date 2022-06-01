@@ -1,9 +1,9 @@
-import { DataSourceAddress, DeviceUpState, YanziSocket } from "@yanzi/socket";
+import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { getDeviceConfig } from "./device";
-import { getUnitOfMeasurement } from "../utils/unit-of-measurement";
 import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availability";
+import { getUnitOfMeasurement } from "../utils/unit-of-measurement";
+import { getDeviceConfig } from "./device";
 import { getEntityCategory, getEntityEnabledByDefault } from "./sensor";
 
 export async function getBinarySensorConfig({

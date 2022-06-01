@@ -1,7 +1,7 @@
 import { YanziSocket } from "@yanzi/socket";
+import { readFile, writeFile } from "fs/promises";
 import { sessionIdFilePath } from "../config";
 import { logger } from "../logger";
-import { readFile, writeFile } from "fs/promises";
 
 export async function login({
   socket,

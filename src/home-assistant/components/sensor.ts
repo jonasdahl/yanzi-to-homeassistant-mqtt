@@ -1,7 +1,7 @@
 import { DataSourceAddress, YanziSocket } from "@yanzi/socket";
 import { defaultMqttTopicMapper } from "../../cirrus-to-mqtt/subscriptions";
 import { getUnitMetadata } from "../../cirrus/unit";
-import { getAvailabilityTopic, onlinePayload, offlinePayload } from "../availability";
+import { getAvailabilityTopic, offlinePayload, onlinePayload } from "../availability";
 import { getUnitOfMeasurement } from "./../utils/unit-of-measurement";
 import { getDeviceConfig } from "./device";
 

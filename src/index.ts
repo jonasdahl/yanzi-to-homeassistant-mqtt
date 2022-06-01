@@ -1,8 +1,7 @@
-import { createSocket, YanziSocket } from "@yanzi/socket";
-import MQTT, { AsyncClient, AsyncMqttClient } from "async-mqtt";
+import { createSocket } from "@yanzi/socket";
+import MQTT from "async-mqtt";
 import "make-promises-safe";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
-import { graphqlRequest } from "./cirrus/graphql";
 import { login } from "./cirrus/login";
 import {
   cirrusAccessToken,
@@ -13,7 +12,6 @@ import {
   locationId,
   mqttUrl,
 } from "./config";
-import { ControlDeviceDocument, OutputValue } from "./generated/graphql";
 import { homeAssistantMqttConfiguration } from "./home-assistant/mqtt-config";
 import { logger } from "./logger";
 

@@ -1,6 +1,6 @@
-import { graphqlRequest } from "./graphql";
-import { GetLocationUnitsDocument } from "../generated/graphql";
 import { YanziSocket } from "@yanzi/socket";
+import { GetLocationUnitsDocument } from "../generated/graphql";
+import { graphqlRequest } from "./graphql";
 
 export async function getLocationMetadata({ socket, locationId }: { socket: YanziSocket; locationId: string }) {
   const data = await graphqlRequest({
