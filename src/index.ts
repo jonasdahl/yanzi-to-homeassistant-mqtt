@@ -1,7 +1,7 @@
 import { createSocket } from "@yanzi/socket";
 import MQTT from "async-mqtt";
+import { readFileSync } from "fs";
 import "make-promises-safe";
-import { readFileSync } from "node:fs";
 import { cirrusSampleSubscriptionToMqtt } from "./cirrus-to-mqtt/subscriptions";
 import { login } from "./cirrus/login";
 import {
@@ -46,11 +46,13 @@ async function run() {
       return null;
     },
   };
+  logger.info("Connecting...");
   const mqttClient = await MQTT.connectAsync(mqttUrl, {
     ca,
     cert,
     key,
     protocol,
+    connectTimeout: 3_000,
     ...extra,
   });
   mqttClient.on("reconnect", () => {
