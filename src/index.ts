@@ -53,6 +53,7 @@ async function run() {
     key,
     protocol,
     connectTimeout: 3_000,
+    rejectUnauthorized: false,
     ...extra,
   });
   mqttClient.on("reconnect", () => {
