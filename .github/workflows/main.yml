@@ -60,6 +60,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: 🐳 Docker build
         uses: docker/build-push-action@v4
