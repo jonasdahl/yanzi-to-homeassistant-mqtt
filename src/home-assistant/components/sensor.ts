@@ -32,6 +32,8 @@ export async function getSensorConfig({
   });
   const gatewayAvailabilityTopic = getAvailabilityTopic({ did: unit.gatewayDid });
 
+  const unitOfMeasurement = await getUnitOfMeasurement({ dataSourceAddress, socket });
+
   return {
     state_topic: topic,
     value_template:
@@ -54,6 +56,7 @@ export async function getSensorConfig({
     device_class: getDeviceClass({ dataSourceAddress }),
     entity_category: getEntityCategory({ dataSourceAddress }),
     enabled_by_default: getEntityEnabledByDefault({ dataSourceAddress }),
+    state_class: unitOfMeasurement ? "measurement" : undefined,
     device: unit.deviceDid
       ? await getDeviceConfig({
           socket,
@@ -61,7 +64,7 @@ export async function getSensorConfig({
           locationId: dataSourceAddress.locationId,
         })
       : undefined,
-    unit_of_measurement: await getUnitOfMeasurement({ dataSourceAddress, socket }),
+    unit_of_measurement: unitOfMeasurement,
 
     availability: [
       { topic: chassisAvailabilityTopic, payload_available: onlinePayload, payload_not_available: offlinePayload },
